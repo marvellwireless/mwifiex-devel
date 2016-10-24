@@ -156,6 +156,7 @@ mwifiex_sdio_probe(struct sdio_func *func, const struct sdio_device_id *id)
 {
 	int ret;
 	struct sdio_mmc_card *card = NULL;
+	bool valid_of_node = false;
 
 	pr_debug("info: vendor=0x%4.04X device=0x%4.04X class=%d function=%d\n",
 		 func->vendor, func->device, func->class, func->num);
@@ -203,10 +204,11 @@ mwifiex_sdio_probe(struct sdio_func *func, const struct sdio_device_id *id)
 			dev_err(&func->dev, "SDIO dt node parse failed\n");
 			goto err_disable;
 		}
+		valid_of_node = true;
 	}
 
 	ret = mwifiex_add_card(card, &add_remove_card_sem, &sdio_ops,
-			       MWIFIEX_SDIO, &func->dev);
+			       MWIFIEX_SDIO, &func->dev, valid_of_node);
 	if (ret) {
 		dev_err(&func->dev, "add card failed\n");
 		goto err_disable;

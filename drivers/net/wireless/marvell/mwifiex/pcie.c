@@ -201,6 +201,7 @@ static int mwifiex_pcie_probe(struct pci_dev *pdev,
 					const struct pci_device_id *ent)
 {
 	struct pcie_service_card *card;
+	bool valid_of_node = false;
 	int ret;
 
 	pr_debug("info: vendor=0x%4.04X device=0x%4.04X rev=%d\n",
@@ -228,10 +229,11 @@ static int mwifiex_pcie_probe(struct pci_dev *pdev,
 		ret = mwifiex_pcie_probe_of(&pdev->dev);
 		if (ret)
 			goto err_free;
+		valid_of_node = true;
 	}
 
 	ret = mwifiex_add_card(card, &add_remove_card_sem, &pcie_ops,
-			       MWIFIEX_PCIE, &pdev->dev);
+			       MWIFIEX_PCIE, &pdev->dev, valid_of_node);
 	if (ret) {
 		pr_err("%s failed\n", __func__);
 		goto err_free;
