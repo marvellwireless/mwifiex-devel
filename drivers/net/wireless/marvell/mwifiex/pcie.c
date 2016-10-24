@@ -231,7 +231,7 @@ static int mwifiex_pcie_probe(struct pci_dev *pdev,
 	}
 
 	ret = mwifiex_add_card(card, &add_remove_card_sem, &pcie_ops,
-			       MWIFIEX_PCIE);
+			       MWIFIEX_PCIE, &pdev->dev);
 	if (ret) {
 		pr_err("%s failed\n", __func__);
 		goto err_free;
@@ -2999,11 +2999,9 @@ static void mwifiex_pcie_get_fw_name(struct mwifiex_adapter *adapter)
 static int mwifiex_register_dev(struct mwifiex_adapter *adapter)
 {
 	struct pcie_service_card *card = adapter->card;
-	struct pci_dev *pdev = card->dev;
 
 	/* save adapter pointer in card */
 	card->adapter = adapter;
-	adapter->dev = &pdev->dev;
 
 	if (mwifiex_pcie_request_irq(adapter))
 		return -1;
