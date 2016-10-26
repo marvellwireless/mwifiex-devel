@@ -112,7 +112,7 @@ mwifiex_sdio_probe(struct sdio_func *func, const struct sdio_device_id *id)
 	pr_debug("info: vendor=0x%4.04X device=0x%4.04X class=%d function=%d\n",
 		 func->vendor, func->device, func->class, func->num);
 
-	card = kzalloc(sizeof(struct sdio_mmc_card), GFP_KERNEL);
+	card = devm_kzalloc(&func->dev, sizeof(*card), GFP_KERNEL);
 	if (!card)
 		return -ENOMEM;
 
@@ -145,7 +145,7 @@ mwifiex_sdio_probe(struct sdio_func *func, const struct sdio_device_id *id)
 
 	if (ret) {
 		dev_err(&func->dev, "failed to enable function\n");
-		goto err_free;
+		return ret;
 	}
 
 	/* device tree node parsing and platform specific configuration*/
@@ -169,8 +169,6 @@ err_disable:
 	sdio_claim_host(func);
 	sdio_disable_func(func);
 	sdio_release_host(func);
-err_free:
-	kfree(card);
 
 	return ret;
 }
@@ -2185,8 +2183,6 @@ static void mwifiex_cleanup_sdio(struct mwifiex_adapter *adapter)
 	kfree(card->mpa_rx.len_arr);
 	kfree(card->mpa_tx.buf);
 	kfree(card->mpa_rx.buf);
-	sdio_set_drvdata(card->func, NULL);
-	kfree(card);
 }
 
 /*
@@ -2235,6 +2231,14 @@ static void mwifiex_recreate_adapter(struct sdio_mmc_card *card)
 	 */
 
 	mwifiex_sdio_remove(func);
+
+	/*
+	 * Normally, we would let the driver core take care of releasing these.
+	 * But we're not letting the driver core handle this one. See above
+	 * TODO.
+	 */
+	sdio_set_drvdata(func, NULL);
+	devm_kfree(&func->dev, card);
 
 	/* power cycle the adapter */
 	sdio_claim_host(func);
