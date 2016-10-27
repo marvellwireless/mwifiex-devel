@@ -155,8 +155,6 @@ int mwifiex_init_fw_complete(struct mwifiex_adapter *adapter)
 int mwifiex_shutdown_fw_complete(struct mwifiex_adapter *adapter)
 {
 	adapter->hw_status = MWIFIEX_HW_STATUS_NOT_READY;
-	adapter->init_wait_q_woken = true;
-	wake_up_interruptible(&adapter->init_wait_q);
 	return 0;
 }
 
